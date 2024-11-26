@@ -1,3 +1,49 @@
+# 更新：
+
+2024/11/26：考虑到旧版错误有点多，这是更新的仓库，更正了题目和答案中的一些错误，增加了CritiqueLLM-6B评测方法。
+
+## 更新内容
+
+data/data_newest_release.jsonl：更新了大约15道题目（主要是数学，如果有其他问题请大家提issue一并指出），更正了id的顺序。
+
+data/data_v1.1_release.jsonl：更正了id的顺序。
+
+data/data_v1.0_release.jsonl：老版本。
+
+alignbench.py：为了应对网站错误的问题，增加了CritiqueLLM评测方法。
+
+## CritiqueLLM评测方法
+
+请先下载CritiqueLLM：
+```
+git clone https://huggingface.co/thu-coai/CritiqueLLM-6B
+```
+安装必要的依赖：`pip install -r requirements.txt`。请注意对Transformers库的版本有要求，因为ChatGLM3并不支持更高Transformers库版本。这里建议4.41.2版本。
+
+然后运行`alignbench.py`：
+```
+python alignbench.py \
+  --model_path <你下载的CritiqueLLM-6B所在路径，默认为../CritiqueLLM-6B> \
+  --problems_path <选用的题目数据，默认为data/data_newest_release.jsonl> \
+  --input_path <你的csv回答> \
+  --output_path <输出的jsonl名称> \
+  --do_sample <True/False，False确保评测结果是固定的，设置为True则对CritiqueLLM采样，有一定随机因素，默认为False> \
+```
+程序需要运行约10-20分钟，输出结果如下面json所示：
+```
+{"中文理解": {"totals": 306, "num": 58, "a": 5.275862068965517, "fails": 0}, "基本任务": {"totals": 352, "num": 68, "a": 5.176470588235294, "fails": 0}, "数学计算": {"totals": 317, "num": 112, "a": 2.830357142857143, "fails": 0}, "专业能力": {"totals": 619, "num": 124, "a": 4.991935483870968, "fails": 0}, "文本写作": {"totals": 427, "num": 75, "a": 5.693333333333333, "fails": 0}, "逻辑推理": {"totals": 246, "num": 92, "a": 2.6739130434782608, "fails": 0}, "角色扮演": {"totals": 670, "num": 116, "a": 5.775862068965517, "fails": 0}, "综合问答": {"totals": 241, "num": 38, "a": 6.342105263157895, "fails": 0}, "语言总分": 5.542594801088087, "推理总分": 2.752135093167702, "AlignBench总分": 4.147364947127894}
+```
+
+## Limitations and Cautions
+
+这些题目可能会触碰到LLM的知识盲区，所以你会看到LLM可能出现复读和输出不通顺的情况。
+
+这个榜单更倾向于风格而不是回答的正确性与严谨性。改善回答的风格可以通过SFT、RLHF、调整数据配比来实现，基底模型的训练量反倒是其次的。
+
+开源数据通常领域较狭窄且风格参差不齐，仅使用开源数据微调庞大的模型也难以获得5分以上的分数。
+
+主要的拉分项是“数学”，但是实际上这里面的“数学”题目质量不高，而且题目和答案也有很多错误（这个仓库已经修了占总112题的10%，可能还有15%的错误没修）。实际上用户也不会问语言模型大量的数学与逻辑问题，占比50%还是多了，个人认为应占10%左右。
+
 # Old Readme
 
 # AlignBench: 多维度中文对齐评测基准 (ACL 2024)
