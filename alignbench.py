@@ -36,7 +36,6 @@ def read_data(args):
         for row in csvreader:
             # 每一行都是一个列表
             data[i]['response'] = row[0]
-            if i==1: print(row[0])
             i+=1
     for i in range(len(data)):
         if args.pointwise:
