@@ -7,7 +7,7 @@ from copy import deepcopy
 from prompts import *
 
 import re
-import csv
+import pandas as pd
 
 def extract_overall_score(text):
     # 定义正则表达式模式
@@ -29,15 +29,14 @@ def read_data(args):
     data = []
     with open(args.problems_path, "r", encoding='utf-8') as f:
         data = [json.loads(line) for line in f.readlines()]
-    with open(args.input_path, 'r', encoding='utf-8') as g:
-        # 创建一个CSV阅读器对象
-        csvreader = csv.reader(g)
-        i=0
-        for row in csvreader:
-            # 每一行都是一个列表
-            data[i]['response'] = row[0]
-            if i==1: print(row[0])
-            i+=1
+    # 读取CSV文件并转换为 Series
+    df = pd.read_csv(args.input_path, header=None)
+    i=0
+    # 迭代 Series 中的元素
+    for response in df.iloc[:,0]:
+        data[i]['response'] = response
+        if i==1: print(response)
+        i+=1
     for i in range(len(data)):
         if args.pointwise:
             if args.reference_free:
@@ -133,5 +132,3 @@ if __name__ == "__main__":
     data = read_data(args)
     print("Generate Begin!")
     batch_generate(model, tokenizer, args.output_path, data, args.batch_size, args)
-        
-# python alignbench.py --input_path ../../v67bsft2.csv --output_path ../../v67bsft2_align.jsonl
